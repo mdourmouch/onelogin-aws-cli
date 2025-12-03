@@ -1,15 +1,16 @@
 """
 Interactions with the user through the cli
 """
-from typing import Any, Callable, List, Tuple
 
-RolePrincipalPair = Tuple
+from collections.abc import Callable
+from typing import Any
+
+RolePrincipalPair = tuple
 
 
-def user_choice(question: str,
-                options: List[Any],
-                renderer: Callable[[Any], str] = lambda x: x,
-                saved_choice: str = None):
+def user_choice(
+    question: str, options: list[Any], renderer: Callable[[Any], str] = lambda x: x, saved_choice: str | None = None
+):
     """
     Prompt a user with a question and a specific set of possible responses
     :param question: Specifying context for the user to select an option
@@ -19,17 +20,17 @@ def user_choice(question: str,
         for option in options:
             if renderer(option) == saved_choice:
                 return option
-        print("Ignoring invalid saved choice '{}'".format(saved_choice))
+        print(f"Ignoring invalid saved choice '{saved_choice}'")
 
     if len(options) == 1:
         return options[0]
 
     print(question)
     if len(options) == 0:
-        raise Exception("No options found")
+        raise ValueError("No options found")
     option_list = []
     for i, option in enumerate(options):
-        option_list.append("[{}] {}".format(i + 1, renderer(option)))
+        option_list.append(f"[{i + 1}] {renderer(option)}")
     selection = None
     while selection is None:
         print("\n".join(option_list))
@@ -45,8 +46,7 @@ def user_choice(question: str,
     return selection
 
 
-def user_role_prompt(all_roles: List[RolePrincipalPair],
-                     saved_choice: str = None) -> RolePrincipalPair:
+def user_role_prompt(all_roles: list[RolePrincipalPair], saved_choice: str | None = None) -> RolePrincipalPair:
     """
     Prompt a user with a list of AWS IAM roles to choose from. If only 1 role
     is available, return that.

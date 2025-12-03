@@ -2,8 +2,8 @@
 Handles the saving and loading of username and password in a secure
 manner
 """
+
 import getpass
-from typing import List
 
 import keyring
 from onelogin.api.models.device import Device
@@ -12,14 +12,14 @@ from onelogin_aws_cli.configuration import Section
 from onelogin_aws_cli.userquery import user_choice
 
 
-class MFACredentials(object):
+class MFACredentials:
     """
     Class to encapsulate the handling and storage of MFA devices, and
     retrieving of OTP's
     """
 
     def __init__(self, config: Section):
-        self._devices = []
+        self._devices: list[Device] = []
         self.device = None
         self._otp = None
         self._config = config
@@ -37,7 +37,7 @@ class MFACredentials(object):
         return self._otp is not None
 
     @property
-    def otp(self) -> str:
+    def otp(self) -> str | None:
         """
         Return the OTP for the MFA and reset the OTP.
         OTP's can only be used once, so it will be reset after.
@@ -58,13 +58,13 @@ class MFACredentials(object):
 
         self._otp = None
 
-    def select_device(self, devices: List[Device]):
+    def select_device(self, devices: list[Device]):
         """Given a list of MFA devices, select one for use"""
 
         self._devices = devices
 
         self.device = user_choice(
-            'Pick an OTP Device:',
+            "Pick an OTP Device:",
             self._devices,
             renderer=lambda d: d.type,
             saved_choice=self._config.get("otp_device"),
@@ -72,18 +72,19 @@ class MFACredentials(object):
 
     def prompt_token(self):
         """Ask the user for an OTP token"""
-        self._otp = input("{device} Token: ".format(device=self.device.type))
+        self._otp = input(f"{self.device.type} Token: ")
 
 
-class UserCredentials(object):
+class UserCredentials:
     """
     Class to encapsulate the handling of storing and retrieving user password
     in OS-Independent system keychain.
     """
+
     SERVICE_NAME = "onelogin-aws-cli"
 
     def __init__(self, config: Section):
-        self.username = config.get('username')
+        self.username = config.get("username")
         self.configuration = config
 
         # This is `None`, as the password should be be emitted from this class
@@ -97,8 +98,7 @@ class UserCredentials(object):
 
         :return: Whether we have set a password or not, yet
         """
-        return (self.password is not None) and \
-               (self.password != "")
+        return (self.password is not None) and (self.password != "")
 
     def load_credentials(self):
         """Load the username and password"""
@@ -114,8 +114,8 @@ class UserCredentials(object):
 
         if not self.username:
             # Try the configuration file first
-            if 'username' in self.configuration:
-                username = self.configuration['username']
+            if "username" in self.configuration:
+                username = self.configuration["username"]
             else:
                 username = input("Onelogin Username: ")
             self.username = username
@@ -128,13 +128,12 @@ class UserCredentials(object):
         """
 
         save_password = False
-        reset_password = self.configuration.get('reset_password')
+        reset_password = self.configuration.get("reset_password")
 
         # Do we have a password?
         if not self.has_password:
             # Can we load the password from os keychain?
             if self.configuration.can_save_password:
-
                 # Load the password from OS keychain
                 self._load_password_from_keychain()
 
@@ -148,10 +147,7 @@ class UserCredentials(object):
                 if not self.has_password:
                     # We still don't have a password and have exhausted all
                     # places to load one from.
-                    raise RuntimeError(
-                        "Could not load password from secure store " +
-                        "nor from user input"
-                    )
+                    raise RuntimeError("Could not load password from secure store " + "nor from user input")
             else:
                 # Ask the user
                 self._prompt_user_password()

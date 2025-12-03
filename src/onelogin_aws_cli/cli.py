@@ -1,8 +1,8 @@
 """
 Collections of entrypoints
 """
-import sys
 
+import sys
 from os import environ
 
 from onelogin_aws_cli import DEFAULT_CONFIG_PATH, OneloginAWS
@@ -13,23 +13,18 @@ from onelogin_aws_cli.configuration import ConfigurationFile
 def _load_config(parser, config_file: ConfigurationFile, args=sys.argv[1:]):
     cli_args = parser.parse_args(args)
 
-    with open(DEFAULT_CONFIG_PATH, 'a+') as fp:
+    with open(DEFAULT_CONFIG_PATH, "a+") as fp:
         fp.seek(0, 0)
         config_file.file = fp
         config_file.load()
 
-        if (cli_args.configure or not config_file.is_initialised):
+        if cli_args.configure or not config_file.is_initialised:
             config_file.initialise(cli_args.config_name)
 
     config_section = config_file.section(cli_args.config_name)
 
     if config_section is None or not config_section.has_required:
-        sys.exit(
-            "Configuration '{}' not defined. "
-            "Please run 'onelogin-aws-login -c'".format(
-                cli_args.config_name
-            )
-        )
+        sys.exit(f"Configuration '{cli_args.config_name}' not defined. Please run 'onelogin-aws-login -c'")
 
     return config_section, cli_args
 
@@ -40,9 +35,8 @@ def login(args=sys.argv[1:]):
     :param args:
     """
 
-    debug = environ.get('ONELOGIN_AWS_CLI_DEBUG', '0') == '1'
+    debug = environ.get("ONELOGIN_AWS_CLI_DEBUG", "0") == "1"
     try:
-
         cfg = ConfigurationFile()
         parser = OneLoginAWSArgumentParser()
         config_section, args = _load_config(parser, cfg, args)

@@ -3,11 +3,10 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from onelogin_aws_cli.configuration import ConfigurationFile
-from onelogin_aws_cli.tests import helper
+from tests import helper
 
 
 class TestConfigurationFile(TestCase):
-
     def test_can_save_password_username_true(self):
         cfg = helper.build_config("""[defaults]
 save_password = true
@@ -67,20 +66,24 @@ save_password = true""")
     def test_initialise(self):
         str = StringIO()
         cfg = ConfigurationFile(str)
-        with patch('builtins.input',
-                   side_effect=['2', 'mock_client_id', 'mock_client_secret',
-                                'mock_aws_app_id', 'mock_subdomain']):
+        with patch(
+            "builtins.input",
+            side_effect=["2", "mock_client_id", "mock_client_secret", "mock_aws_app_id", "mock_subdomain"],
+        ):
             cfg.initialise()
         str.seek(0)
 
-        self.assertEqual("""[defaults]
+        self.assertEqual(
+            """[defaults]
 base_uri = https://api.eu.onelogin.com/
 client_id = mock_client_id
 client_secret = mock_client_secret
 aws_app_id = mock_aws_app_id
 subdomain = mock_subdomain
 
-""", str.getvalue())
+""",
+            str.getvalue(),
+        )
 
     def test_is_initialised(self):
         content = StringIO()

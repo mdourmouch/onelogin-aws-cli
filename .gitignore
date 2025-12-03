@@ -80,6 +80,7 @@ celerybeat-schedule
 
 # virtualenv
 venv/
+.venv/
 ENV/
 
 # Spyder project settings
@@ -87,3 +88,7 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
